@@ -72,7 +72,7 @@ flags = 255
 off                = false   # 写 true 会报错：灭灯是 default.on = false
 direct             = true    # Vial 的 Direct Control（逐键涂色），也用来探灯序
 solid_color        = true
-alpha_mods         = true
+alphas_mods        = true
 gradient_up_down   = true
 gradient_left_right = true
 breathing          = true
