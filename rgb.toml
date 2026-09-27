@@ -26,9 +26,9 @@ color_order = "grb"
 driver = "ws2812"
 # 灯链长度，必须与 [[rgb_matrix.layout]] 的条数一致（也可以省略，由 layout 推导）。
 led_count = 19
-# QMK: rgb_matrix.max_brightness。19 颗全白约 1.14A@5V，所以压到 128；
-# 它同时也是 Vial 亮度滑条的满量程。
-max_brightness = 128
+# QMK: rgb_matrix.max_brightness。它同时也是 Vial 亮度滑条的满量程。
+# 16/255 ≈ 6%，19 颗全白也只有几十 mA，长期当氛围灯用。
+max_brightness = 16
 # QMK: rgb_matrix.timeout，多久没有按键就自动熄灯（毫秒），0 = 不熄。
 timeout = 0
 # QMK: rgb_matrix.led_flush_limit，帧间隔（毫秒）。QMK 默认 16（≈60fps），
@@ -37,9 +37,9 @@ led_flush_limit = 16
 # QMK: rgb_matrix.react_on_keyup。改成 true 时 reactive 类效果（solid_reactive_*、
 # splash）响应抬键而不是按下。QMK 默认是按下，这里保持一致。
 react_on_keyup = false
-# QMK: rgb_matrix.center_point。x 取值 0..224、y 取值 0..64（QMK 的坐标空间），
-# 本键盘 x 跨 0..224、y 跨 0..64，几何中心就是 QMK 的默认值。
-center_point = [112, 32]
+# QMK: rgb_matrix.center_point。风车 / 螺旋 / 信标 / 涟漪这类效果量距离用的中心，
+# 必须和灯表的 x/y 用同一个坐标空间；本键盘键群几何中心就是 (64, 96)。
+center_point = [64, 96]
 # QMK: rgb_matrix.hue_steps / sat_steps / val_steps / speed_steps。
 hue_steps = 8
 sat_steps = 16
@@ -60,8 +60,9 @@ on = true
 animation = "solid_color"
 hue = 0
 sat = 255
-# 亮度只给 64（满量程 128），首次上电电流约 0.15A，不刺眼。
-val = 64
+# 亮度给到上限 16（不做 clamp 的话，默认值可以超过 max_brightness，
+# 像 QMK 一样只有 sethsv/Vial 那条路会被夹）。
+val = 16
 speed = 128
 flags = 255
 
@@ -125,153 +126,152 @@ starlight_dual_hue = true
 # LED 链顺序表（已按实测灯链顺序填好）：一条一条按“灯链上的物理顺序”排，从 DIN 第一颗开始。
 #
 #   灯链序号 = 注释里的编号（也是数组下标 + 1）
-#   matrix   = 该灯所在键的电气矩阵位置 (行, 列)，与 keyboard.toml 的 [layout] 对应。
+#   matrix   = 该灯所在键的**电气**矩阵位置 (行, 列)，必须与 keyboard.toml 的 [layout] 对应，
+#              也必须唯一、存在——它只决定“按哪个键亮哪颗灯”，和物理位置无关。
 #              注意底部一行：本表的 (5,0) 是 2u 宽键、(5,2) 是它右边那颗 1u、(5,3) 是 2u 高的键；
 #              (5,1) 是空位（2u 键的右半格），不是独立按键。
-#   x, y     = 该键在 QMK 坐标空间里的位置（x: 0..224，y: 0..64），按 PCB 实际尺寸换算：
-#              板宽 76.2 mm / 4 列 = 19.05 mm 键距，板高 114.3 mm / 6 行 = 19.05 mm 键距，
-#              键心毫米坐标按 x = 224/76.2 * mm、y = 64/114.3 * mm 映射，得到
-#                列心 9.525 / 28.575 / 47.625 / 66.675 mm → x = 28 / 84 / 140 / 196
-#                行心 9.525 / 28.575 / 47.625 / 66.675 / 85.725 / 104.775 mm → y = 5 / 16 / 27 / 37 / 48 / 59
-#              跨两格的键取整键中心：(5,0) 2u 宽 → x = 56；(3,3) 2u 高（第 2~3 行）→ y = 32；
-#              (5,3) 2u 高（第 4~5 行）→ y = 53。
-#              另外两个 2u 高的键（(3,3) KpPlus、(5,3) KpEnter）的 x 按实测取 182
+#   x, y     = 该键的**物理**位置，用本板自己的坐标，每格 32 单位：
+#              4 列 × 32 = 128 宽、6 行 × 32 = 192 高，整数格心是
+#                列 16 / 48 / 80 / 112      行 16 / 48 / 80 / 112 / 144 / 176
+#              跨两格的键取整键中心：(5,0) 2u 宽跨第 0~1 列 → x = 32；
+#              (3,3) KpPlus 2u 高跨第 2~3 行 → y = 96；(5,3) KpEnter 2u 高跨第 4~5 行 → y = 160。
+#              两个 2u 高的键 x 按实测取 104（第三列 + 3/4 ×（第四列 − 第三列）= 80 + 0.75 × 32）。
+#              这样键群的几何中心正好是 (64, 96)，与 [rgb_matrix] 的 center_point 一致。
 #   flags    = 4 = LED_FLAG_KEYLIGHT（键灯）
 
 [[rgb_matrix.layout]]
 # 1
 matrix = [0, 0]
-x = 28
-y = 5
+x = 16
+y = 16
 flags = 4
 
 [[rgb_matrix.layout]]
 # 2
 matrix = [0, 1]
-x = 84
-y = 5
+x = 48
+y = 16
 flags = 4
 
 [[rgb_matrix.layout]]
 # 3
 matrix = [1, 0]
-x = 28
-y = 16
+x = 16
+y = 48
 flags = 4
 
 [[rgb_matrix.layout]]
 # 4
 matrix = [1, 1]
-x = 84
-y = 16
+x = 48
+y = 48
 flags = 4
 
 [[rgb_matrix.layout]]
 # 5
 matrix = [1, 2]
-x = 140
-y = 16
+x = 80
+y = 48
 flags = 4
 
 [[rgb_matrix.layout]]
 # 6
 matrix = [1, 3]
-x = 196
-y = 16
+x = 112
+y = 48
 flags = 4
 
 [[rgb_matrix.layout]]
 # 7
 matrix = [2, 0]
-x = 28
-y = 27
+x = 16
+y = 80
 flags = 4
 
 [[rgb_matrix.layout]]
 # 8
 matrix = [2, 1]
-x = 84
-y = 27
+x = 48
+y = 80
 flags = 4
 
 [[rgb_matrix.layout]]
 # 9
 matrix = [2, 2]
-x = 140
-y = 27
+x = 80
+y = 80
 flags = 4
 
 [[rgb_matrix.layout]]
 # 10
 matrix = [3, 0]
-x = 28
-y = 37
+x = 16
+y = 112
 flags = 4
 
 [[rgb_matrix.layout]]
 # 11
 matrix = [3, 1]
-x = 84
-y = 37
+x = 48
+y = 112
 flags = 4
 
 [[rgb_matrix.layout]]
 # 12
 matrix = [3, 2]
-x = 140
-y = 37
+x = 80
+y = 112
 flags = 4
 
-# KpPlus：2u 高，跨第 2~3 行 → y 取整键中心 32；x 按实测取 182
-# （第三列 + 3/4 ×（第四列 - 第三列）= 140 + 0.75 × 56）
+# KpPlus：2u 高，跨第 2~3 行 → y 取整键中心 96；x 按实测取 104
 [[rgb_matrix.layout]]
 # 13
 matrix = [3, 3]
-x = 182
-y = 32
+x = 104
+y = 96
 flags = 4
 
 [[rgb_matrix.layout]]
 # 14
 matrix = [4, 0]
-x = 28
-y = 48
+x = 16
+y = 144
 flags = 4
 
 [[rgb_matrix.layout]]
 # 15
 matrix = [4, 1]
-x = 84
-y = 48
+x = 48
+y = 144
 flags = 4
 
 [[rgb_matrix.layout]]
 # 16
 matrix = [4, 2]
-x = 140
-y = 48
+x = 80
+y = 144
 flags = 4
 
-# 底部 2u 宽键（“0”）：跨第 0~1 列 → x 取整键中心 56
+# 底部 2u 宽键（“0”）：跨第 0~1 列 → x 取整键中心 32
 [[rgb_matrix.layout]]
 # 17
 matrix = [5, 0]
-x = 56
-y = 59
+x = 32
+y = 176
 flags = 4
 
 # 2u 宽键右边那颗 1u
 [[rgb_matrix.layout]]
 # 18
 matrix = [5, 2]
-x = 140
-y = 59
+x = 80
+y = 176
 flags = 4
 
-# KpEnter：2u 高，跨第 4~5 行 → y 取整键中心 53；x 同上取 182
+# KpEnter：2u 高，跨第 4~5 行 → y 取整键中心 160；x 同上 104
 [[rgb_matrix.layout]]
 # 19
 matrix = [5, 3]
-x = 182
-y = 53
+x = 104
+y = 160
 flags = 4
