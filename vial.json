@@ -1,36 +1,91 @@
 {
-    "name": "HID Keyboard",
+    "name": "desk_hub",
     "vendorId": "0x4C4B",
     "productId": "0x4643",
-    "lighting": "none",
+    "lighting": "vialrgb",
     "matrix": {
-        "rows": 4,
-        "cols": 3
+        "rows": 6,
+        "cols": 4
     },
+    "customKeycodes": [
+        {
+            "name": "BLE_PROFILE_1",
+            "title": "BLE Profile 1"
+        },
+        {
+            "name": "BLE_PROFILE_2",
+            "title": "BLE Profile 2"
+        },
+        {
+            "name": "BLE_PROFILE_3",
+            "title": "BLE Profile 3"
+        },
+        {
+            "name": "BLE_PROFILE_NEXT",
+            "title": "BLE Next Profile"
+        },
+        {
+            "name": "BLE_PROFILE_PREV",
+            "title": "BLE Previous Profile"
+        },
+        {
+            "name": "BLE_CLEAR_BOND",
+            "title": "BLE Clear Bond"
+        },
+        {
+            "name": "BLE_TOGGLE_TRANSPORT",
+            "title": "Toggle USB / BLE"
+        },
+        {
+            "name": "RESERVED_7",
+            "title": "Reserved (User 7)"
+        },
+        {
+            "name": "RESERVED_8",
+            "title": "Reserved (User 8)"
+        }
+    ],
     "layouts": {
         "keymap": [
             [
                 "0,0",
-                "0,1",
-                "0,2"
+                "0,1"
             ],
             [
                 "1,0",
                 "1,1",
-                "1,2"
+                "1,2",
+                "1,3"
             ],
             [
                 "2,0",
                 "2,1",
-                "2,2"
+                "2,2",
+                {
+                    "h": 2
+                },
+                "3,3"
+            ],
+            [
+                "3,0",
+                "3,1",
+                "3,2"
+            ],
+            [
+                "4,0",
+                "4,1",
+                "4,2",
+                {
+                    "h": 2
+                },
+                "5,3"
             ],
             [
                 {
-                    "y": -2,
-                    "x": 4
+                    "w": 2
                 },
-                "3,0",
-                "3,2"
+                "5,0",
+                "5,2"
             ]
         ]
     }

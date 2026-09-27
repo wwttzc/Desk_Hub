@@ -1,0 +1,245 @@
+# desk_hub 灯光配置
+#
+# 这是本键盘唯一的灯光配置文件，由 RMK 自己读取（放在 keyboard.toml 旁边），
+# 键名和默认值对齐 QMK 的 info.json / config.h：
+#   https://docs.qmk.fm/features/rgb_matrix
+#   https://docs.qmk.fm/features/rgb_matrix#additional-configuration-options
+#
+# 改完这个文件不需要动任何 Rust 代码。写了但 RMK 做不到的键会直接编译报错，
+# 不会静默无效。
+
+[ws2812]
+# QMK: ws2812.pin（rules.mk 里的 WS2812_DI_PIN）。
+# 矩阵占用 GPIO5/6/7/15/16/17 + 9/10/11/12，屏幕与 USB 另占若干。
+pin = "GPIO4"
+# QMK: WS2812_BYTE_ORDER。WS2812B 是 grb；若上电后红绿颠倒，改成 "rgb"。
+color_order = "grb"
+# 以下时序对应 QMK 的 WS2812_TIMING / T1H / T0H / TRST_US，默认即 WS2812B，
+# 通常不用写。period = T1H + T1L = T0H + T0L。
+# timing_ns = 1250
+# t1h_ns = 900
+# t0h_ns = 350
+# reset_us = 280
+
+[rgb_matrix]
+# QMK: rgb_matrix.driver。目前只实现了 ws2812。
+driver = "ws2812"
+# 灯链长度，必须与 [[rgb_matrix.layout]] 的条数一致（也可以省略，由 layout 推导）。
+led_count = 19
+# QMK: rgb_matrix.max_brightness。19 颗全白约 1.14A@5V，所以压到 128；
+# 它同时也是 Vial 亮度滑条的满量程。
+max_brightness = 128
+# QMK: rgb_matrix.timeout，多久没有按键就自动熄灯（毫秒），0 = 不熄。
+timeout = 0
+# QMK: rgb_matrix.led_flush_limit，帧间隔（毫秒）。QMK 默认 16（≈60fps），
+# 这里用 33（≈30fps）：本引擎每帧只在整条链上渲染一次，33ms 已足够顺滑。
+led_flush_limit = 33
+# QMK: rgb_matrix.react_on_keyup。reactive 类效果（solid_reactive_*、splash）
+# 目前还没移植，所以只能 false。
+react_on_keyup = false
+# QMK: rgb_matrix.center_point。x 取值 0..224、y 取值 0..64（QMK 的坐标空间），
+# 本键盘 x 跨 0..224、y 跨 0..64，几何中心就是 QMK 的默认值。
+center_point = [112, 32]
+# QMK: rgb_matrix.hue_steps / sat_steps / val_steps / speed_steps。
+hue_steps = 8
+sat_steps = 16
+val_steps = 16
+speed_steps = 16
+
+# 以下 QMK 键本固件没有对应行为，写了会直接编译失败（未知字段），因为它们不是
+# “没接上”而是“没有这个功能”：
+#   led_process_limit  —— RMK 每帧一次性渲染整条链，等价于 QMK 把它设成灯数
+#   sleep              —— 需要主机挂起检测，RMK 侧没有接
+#   split_count        —— 单链键盘
+#   flag_steps         —— 需要 RMK 还没有的灯光键码（RgbFlag*）
+
+[rgb_matrix.default]
+# 上电默认状态；Vial 里保存过设置后以 flash 里的为准。
+# 首次烧录建议保持 on = true：能立刻看出灯链是否工作；不想要灯就改 false。
+on = true
+animation = "solid_color"
+hue = 0
+sat = 255
+# 亮度只给 64（满量程 128），首次上电电流约 0.15A，不刺眼。
+val = 64
+speed = 128
+flags = 255
+
+[rgb_matrix.animations]
+# 要编进固件的效果；值写 false 的效果不存在于固件里，也不会出现在 Vial 面板。
+# 目前 RMK 已实现的全部打开（36 个）。其中 pixel_flow / starlight* /
+# flower_blooming / riverflow 不在 Vial 的效果表里，只能由 RGB_MOD 键码切到。
+off                = false   # 写 true 会报错：灭灯是 default.on = false
+direct             = true    # Vial 的 Direct Control（逐键涂色），也用来探灯序
+solid_color        = true
+alpha_mods         = true
+gradient_up_down   = true
+gradient_left_right = true
+breathing          = true
+band_sat           = true
+band_val           = true
+band_pinwheel_sat  = true
+band_pinwheel_val  = true
+band_spiral_sat    = true
+band_spiral_val    = true
+cycle_all          = true
+cycle_left_right   = true
+cycle_up_down      = true
+rainbow_moving_chevron = true
+cycle_out_in       = true
+cycle_out_in_dual  = true
+cycle_pinwheel     = true
+cycle_spiral       = true
+dual_beacon        = true
+rainbow_beacon     = true
+rainbow_pinwheels  = true
+raindrops          = true
+jellybean_raindrops = true
+hue_breathing      = true
+hue_pendulum       = true
+hue_wave           = true
+pixel_rain         = true
+pixel_flow         = true
+starlight_smooth   = true
+flower_blooming    = true
+riverflow          = true
+starlight          = true
+starlight_dual_sat = true
+starlight_dual_hue = true
+
+# 尚未移植（写了会报错，列在这里备查）：
+#   typing_heatmap, digital_rain,
+#   solid_reactive_simple, solid_reactive, solid_reactive_wide,
+#   solid_reactive_multiwide, solid_reactive_cross, solid_reactive_multicross,
+#   solid_reactive_nexus, solid_reactive_multinexus,
+#   splash, multisplash, solid_splash, solid_multisplash, pixel_fractal
+# 它们都要按键事件或矩阵 framebuffer，属于第二批。
+
+# LED 链顺序表：一条一条按“灯链上的物理顺序”排，从 DIN 第一颗开始。
+#
+#   灯链序号 = 下面这一行的序号
+#   matrix   = 该灯所在键的电气矩阵位置 (行, 列)，与 keyboard.toml 的 [layout] 对应
+#   x, y     = 该键在 QMK 坐标空间里的位置（x: 0..224，y: 0..64），
+#              由 4 列 6 行的物理布局算出：x = 224/3 * 列号，y = 64/5 * 行号
+#   flags    = 4 = LED_FLAG_KEYLIGHT（键灯）
+#
+# ⚠️ 目前的顺序是**占位**：按 keyboard.toml [layout].map 的书写顺序排的，
+#    不一定等于实际焊接顺序。用 Vial 的 Direct Control 逐颗点亮读出真实顺序后，
+#    把下面的行重排即可（x/y/flags 跟着 matrix 走，不要改）。
+
+[[rgb_matrix.layout]]
+matrix = [0, 0]
+x = 0
+y = 0
+flags = 4
+
+[[rgb_matrix.layout]]
+matrix = [0, 1]
+x = 75
+y = 0
+flags = 4
+
+[[rgb_matrix.layout]]
+matrix = [1, 0]
+x = 0
+y = 13
+flags = 4
+
+[[rgb_matrix.layout]]
+matrix = [1, 1]
+x = 75
+y = 13
+flags = 4
+
+[[rgb_matrix.layout]]
+matrix = [1, 2]
+x = 149
+y = 13
+flags = 4
+
+[[rgb_matrix.layout]]
+matrix = [1, 3]
+x = 224
+y = 13
+flags = 4
+
+[[rgb_matrix.layout]]
+matrix = [2, 0]
+x = 0
+y = 26
+flags = 4
+
+[[rgb_matrix.layout]]
+matrix = [2, 1]
+x = 75
+y = 26
+flags = 4
+
+[[rgb_matrix.layout]]
+matrix = [2, 2]
+x = 149
+y = 26
+flags = 4
+
+# “+” 键：2u 高，开关在矩阵 (3,3)，物理位置在第 3 列第 3 行。
+[[rgb_matrix.layout]]
+matrix = [3, 3]
+x = 224
+y = 26
+flags = 4
+
+[[rgb_matrix.layout]]
+matrix = [3, 0]
+x = 0
+y = 38
+flags = 4
+
+[[rgb_matrix.layout]]
+matrix = [3, 1]
+x = 75
+y = 38
+flags = 4
+
+[[rgb_matrix.layout]]
+matrix = [3, 2]
+x = 149
+y = 38
+flags = 4
+
+[[rgb_matrix.layout]]
+matrix = [4, 0]
+x = 0
+y = 51
+flags = 4
+
+[[rgb_matrix.layout]]
+matrix = [4, 1]
+x = 75
+y = 51
+flags = 4
+
+[[rgb_matrix.layout]]
+matrix = [4, 2]
+x = 149
+y = 51
+flags = 4
+
+# Enter 键：2u 高，开关在矩阵 (5,3)。
+[[rgb_matrix.layout]]
+matrix = [5, 3]
+x = 224
+y = 51
+flags = 4
+
+# “0” 键：2u 宽，开关在矩阵 (5,0)。
+[[rgb_matrix.layout]]
+matrix = [5, 0]
+x = 0
+y = 64
+flags = 4
+
+[[rgb_matrix.layout]]
+matrix = [5, 2]
+x = 149
+y = 64
+flags = 4

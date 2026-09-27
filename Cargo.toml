@@ -1,0 +1,64 @@
+[package]
+name = "desk_hub"
+version = "0.1.0"
+description = "desk_hub macro pad: RMK firmware with per-key RGB configured by rgb.toml"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+publish = false
+
+# `rmkit create` copies this file into the generated project verbatim and then
+# leaves the rmk feature list alone, so the fork and the feature set below are
+# what actually gets built. `rgb_matrix` is the per-key RGB engine, and its
+# `rgb.toml` is copied in by the workflow.
+[dependencies]
+rmk = { git = "https://github.com/wwttzc/rmk_rgb", branch = "lighting", default-features = false, features = [
+    "esp32s3_ble",
+    "log",
+    "storage",
+    "vial",
+    "rgb_matrix",
+] }
+embassy-executor = { version = "0.10" }
+embassy-time = { version = "0.5" }
+esp-backtrace = { version = "0.20", features = [
+    "esp32s3",
+    "panic-handler",
+    "println",
+] }
+esp-hal = { version = "1.2", features = ["esp32s3", "unstable"] }
+# The WS2812 chain is driven from one RMT channel.
+esp-hal-smartled = { version = "0.18", features = ["esp32s3"] }
+smart-leds-trait = "0.3"
+esp-storage = { version = "0.10", features = ["embedded-storage", "esp32s3"] }
+esp-alloc = { version = "0.11", features = ["esp32s3"] }
+esp-println = { version = "0.18", features = ["esp32s3", "log-04"] }
+esp-rtos = { version = "0.4", features = ["esp32s3", "embassy"] }
+esp-bootloader-esp-idf = { version = "0.6", features = ["esp32s3", "log-04"] }
+
+# The template's build.rs reads vial.json and ships it to the firmware; these are
+# its dependencies, not ours.
+[build-dependencies]
+xz2 = "0.1.7"
+json = "0.12"
+const-gen = "1.6"
+
+[[bin]]
+name = "desk_hub"
+test = false
+bench = false
+
+[profile.dev.package.esp-storage]
+opt-level = 3
+
+[profile.dev]
+# Rust debug builds are too slow to scan a matrix at a usable rate.
+opt-level = "s"
+
+[profile.release]
+codegen-units = 1
+debug = 2
+debug-assertions = false
+incremental = false
+lto = 'thin'
+opt-level = 3
+overflow-checks = false

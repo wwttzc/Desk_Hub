@@ -1,13 +1,88 @@
 name: Build RMK firmware
+
+# The upstream reusable workflow only copies keyboard.toml, vial.json,
+# Cargo.toml and memory.x into the generated project, so `rgb.toml` has to be
+# copied in by a step of our own. Everything else here mirrors
+# rmk-rs/rmk/.github/workflows/user_build.yml@main for an esp32s3 board.
+
 on:
   workflow_dispatch:
   push:
     paths:
       - "**"
 
+env:
+  RUST_MIN_STACK: "67108864"
+
 jobs:
   build:
-    uses: rmk-rs/rmk/.github/workflows/user_build.yml@main
-    with:
-      keyboard_toml_path: "keyboard.toml"
-      vial_json_path: "vial.json"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@1.96.0
+      - uses: cargo-bins/cargo-binstall@main
+
+      - name: Install rmkit, cargo-make, flip-link and the esp tools
+        run: cargo binstall cargo-make rmkit flip-link cargo-espflash espup -y
+
+      - name: Cache ESP Rust toolchain
+        id: esp-toolchain-cache
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.rustup/toolchains/esp
+            ~/export-esp.sh
+          key: ${{ runner.os }}-esp-toolchain-esp32s3-v1
+
+      - name: Prepare esp environment
+        if: steps.esp-toolchain-cache.outputs.cache-hit != 'true'
+        run: espup install
+
+      - name: Create firmware project
+        run: |
+          rmkit create \
+            --keyboard-toml-path keyboard.toml \
+            --vial-json-path vial.json \
+            --version main \
+            --target-dir rmk
+
+      - name: Add the lighting configuration
+        run: cp -f rgb.toml rmk/rgb.toml
+
+      - name: Cache cargo registry and target
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "rmk -> target"
+
+      - name: Build firmware
+        working-directory: ./rmk
+        run: |
+          set +e
+          . /home/runner/export-esp.sh
+          cargo make uf2 --release > build.log 2>&1
+          status=$?
+          if [ $status -ne 0 ]; then
+            # Job logs need authentication to read, but check-run annotations do
+            # not, so a failure is reported through those.
+            tail -c 60000 build.log | while IFS= read -r line; do echo "::error::$line"; done
+            exit $status
+          fi
+          tail -5 build.log
+
+      - name: Stage the ELF for debugging
+        working-directory: ./rmk
+        run: |
+          for f in target/*/release/*; do
+            if [ -f "$f" ] && [ -x "$f" ]; then
+              cp "$f" "$(basename "$f").elf"
+            fi
+          done
+
+      - name: Upload firmware
+        uses: actions/upload-artifact@v7
+        with:
+          name: desk_hub-firmware
+          path: |
+            rmk/*.bin
+            rmk/*.elf
+          if-no-files-found: error
