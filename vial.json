@@ -7,44 +7,7 @@
         "rows": 6,
         "cols": 4
     },
-    "customKeycodes": [
-        {
-            "name": "BLE_PROFILE_1",
-            "title": "BLE Profile 1"
-        },
-        {
-            "name": "BLE_PROFILE_2",
-            "title": "BLE Profile 2"
-        },
-        {
-            "name": "BLE_PROFILE_3",
-            "title": "BLE Profile 3"
-        },
-        {
-            "name": "BLE_PROFILE_NEXT",
-            "title": "BLE Next Profile"
-        },
-        {
-            "name": "BLE_PROFILE_PREV",
-            "title": "BLE Previous Profile"
-        },
-        {
-            "name": "BLE_CLEAR_BOND",
-            "title": "BLE Clear Bond"
-        },
-        {
-            "name": "BLE_TOGGLE_TRANSPORT",
-            "title": "Toggle USB / BLE"
-        },
-        {
-            "name": "RESERVED_7",
-            "title": "Reserved (User 7)"
-        },
-        {
-            "name": "RESERVED_8",
-            "title": "Reserved (User 8)"
-        }
-    ],
+
     "layouts": {
         "keymap": [
             [
