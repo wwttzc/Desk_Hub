@@ -33,7 +33,7 @@ max_brightness = 128
 timeout = 0
 # QMK: rgb_matrix.led_flush_limit，帧间隔（毫秒）。QMK 默认 16（≈60fps），
 # 这里用 33（≈30fps）：本引擎每帧只在整条链上渲染一次，33ms 已足够顺滑。
-led_flush_limit = 33
+led_flush_limit = 16
 # QMK: rgb_matrix.react_on_keyup。改成 true 时 reactive 类效果（solid_reactive_*、
 # splash）响应抬键而不是按下。QMK 默认是按下，这里保持一致。
 react_on_keyup = false
