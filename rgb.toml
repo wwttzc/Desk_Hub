@@ -122,134 +122,153 @@ starlight          = true
 starlight_dual_sat = true
 starlight_dual_hue = true
 
-# LED 链顺序表：一条一条按“灯链上的物理顺序”排，从 DIN 第一颗开始。
+# LED 链顺序表（已按实测灯链顺序填好）：一条一条按“灯链上的物理顺序”排，从 DIN 第一颗开始。
 #
-#   灯链序号 = 下面这一行的序号
-#   matrix   = 该灯所在键的电气矩阵位置 (行, 列)，与 keyboard.toml 的 [layout] 对应
-#   x, y     = 该键在 QMK 坐标空间里的位置（x: 0..224，y: 0..64），按 QMK 文档的公式算：
-#              x = 224 / (列数 - 1) * 列号 = 224/3 * 列号 → 0 / 75 / 149 / 224
-#              y =  64 / (行数 - 1) * 行号 =  64/5 * 行号 → 0 / 13 / 26 / 38 / 51 / 64
-#              两个 2u 键取整键中心：KpPlus(3,3) 跨 2~3 行 → y=32；
-#              KpEnter(5,3) 跨 4~5 行 → y=57；底部 2u 宽的 (5,0) 跨 0~1 列 → x=37
+#   灯链序号 = 注释里的编号（也是数组下标 + 1）
+#   matrix   = 该灯所在键的电气矩阵位置 (行, 列)，与 keyboard.toml 的 [layout] 对应。
+#              注意底部一行：本表的 (5,0) 是 2u 宽键、(5,2) 是它右边那颗 1u、(5,3) 是 2u 高的键；
+#              (5,1) 是空位（2u 键的右半格），不是独立按键。
+#   x, y     = 该键在 QMK 坐标空间里的位置（x: 0..224，y: 0..64）：
+#              标准格 x = 224/3 * 列号 → 0 / 75 / 149 / 224
+#              标准格 y =  64/5 * 行号 → 0 / 13 / 26 / 38 / 51 / 64
+#              特例（按实测要求）：(3,3) KpPlus 与 (5,3) KpEnter 各跨两行 → y 取两行中间值；
+#              (5,0) 2u 宽跨前两列 → x 取两列中间值；
+#              (3,3) 与 (5,3) 的 x = 第三列 + 3/4 × (第四列 - 第三列) = 149 + 0.75 × 75 ≈ 205
 #   flags    = 4 = LED_FLAG_KEYLIGHT（键灯）
-#
-# ⚠️ 目前的顺序是**占位**：按 keyboard.toml [layout].map 的书写顺序排的，
-#    不一定等于实际焊接顺序。用 Vial 的 Direct Control 逐颗点亮读出真实顺序后，
-#    把下面的行重排即可（每行的 matrix/x/y/flags 描述的是同一颗灯，整块一起搬）。
 
 [[rgb_matrix.layout]]
+# 1
 matrix = [0, 0]
 x = 0
 y = 0
 flags = 4
 
 [[rgb_matrix.layout]]
+# 2
 matrix = [0, 1]
 x = 75
 y = 0
 flags = 4
 
 [[rgb_matrix.layout]]
+# 3
 matrix = [1, 0]
 x = 0
 y = 13
 flags = 4
 
 [[rgb_matrix.layout]]
+# 4
 matrix = [1, 1]
 x = 75
 y = 13
 flags = 4
 
 [[rgb_matrix.layout]]
+# 5
 matrix = [1, 2]
 x = 149
 y = 13
 flags = 4
 
 [[rgb_matrix.layout]]
+# 6
 matrix = [1, 3]
 x = 224
 y = 13
 flags = 4
 
 [[rgb_matrix.layout]]
+# 7
 matrix = [2, 0]
 x = 0
 y = 26
 flags = 4
 
 [[rgb_matrix.layout]]
+# 8
 matrix = [2, 1]
 x = 75
 y = 26
 flags = 4
 
 [[rgb_matrix.layout]]
+# 9
 matrix = [2, 2]
 x = 149
 y = 26
 flags = 4
 
-# “+” 键：2u 高，开关在矩阵 (3,3)，物理位置在第 3 列、第 2~3 行，取整键中心。
 [[rgb_matrix.layout]]
-matrix = [3, 3]
-x = 224
-y = 32
-flags = 4
-
-[[rgb_matrix.layout]]
+# 10
 matrix = [3, 0]
 x = 0
 y = 38
 flags = 4
 
 [[rgb_matrix.layout]]
+# 11
 matrix = [3, 1]
 x = 75
 y = 38
 flags = 4
 
 [[rgb_matrix.layout]]
+# 12
 matrix = [3, 2]
 x = 149
 y = 38
 flags = 4
 
+# KpPlus：2u 高，跨第 3~4 行 → y 取中间值 32；x 按实测取 205
 [[rgb_matrix.layout]]
+# 13
+matrix = [3, 3]
+x = 205
+y = 32
+flags = 4
+
+[[rgb_matrix.layout]]
+# 14
 matrix = [4, 0]
 x = 0
 y = 51
 flags = 4
 
 [[rgb_matrix.layout]]
+# 15
 matrix = [4, 1]
 x = 75
 y = 51
 flags = 4
 
 [[rgb_matrix.layout]]
+# 16
 matrix = [4, 2]
 x = 149
 y = 51
 flags = 4
 
-# Enter 键：2u 高，开关在矩阵 (5,3)，跨第 4~5 行，取整键中心。
+# 底部 2u 宽键（“0”）：跨前两列 → x 取中间值 37
 [[rgb_matrix.layout]]
-matrix = [5, 3]
-x = 224
-y = 57
-flags = 4
-
-# “0” 键：2u 宽，开关在矩阵 (5,0)，跨第 0~1 列，取整键中心。
-[[rgb_matrix.layout]]
+# 17
 matrix = [5, 0]
 x = 37
 y = 64
 flags = 4
 
+# 2u 宽键右边那颗 1u：x 取第三列 149
 [[rgb_matrix.layout]]
+# 18
 matrix = [5, 2]
 x = 149
 y = 64
+flags = 4
+
+# KpEnter：2u 高，跨第 5~6 行 → y 取中间值 57；x 按实测取 205
+[[rgb_matrix.layout]]
+# 19
+matrix = [5, 3]
+x = 205
+y = 57
 flags = 4
