@@ -6,6 +6,12 @@ edition = "2021"
 license = "MIT OR Apache-2.0"
 publish = false
 
+# `rmkit create` copies this manifest into `rmk/`, a subdirectory of this
+# repository. Without an explicit workspace table cargo would walk up from the
+# generated project, find this very file, and refuse to build: "failed searching
+# for potential workspace".
+[workspace]
+
 # `rmkit create` copies this file into the generated project verbatim and then
 # leaves the rmk feature list alone, so the fork and the feature set below are
 # what actually gets built. `rgb_matrix` is the per-key RGB engine, and its
