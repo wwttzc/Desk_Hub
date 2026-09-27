@@ -51,18 +51,6 @@ Kp1       Kp2      Kp3         KpEnter
 Kp0                KpDot
 """
 
-# 第 1 层留空（全是透明），等你在 Vial 里填。
-[[keymap.layer]]
-name = "fn"
-keys = """
-_  _
-_  _  _  _
-_  _  _  _
-_  _  _
-_  _  _  _
-_     _
-"""
-
 [ble]
 # 关闭 BLE：不再广播/配对。注意 esp32s3 只有 esp32s3_ble 这个 feature 能拿到
 # esp-hal，所以 BLE 栈仍会被编进固件，只是运行时不启用。
