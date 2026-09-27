@@ -43,10 +43,10 @@ instead of doing nothing.
   depend on position (gradients, pinwheels, beacons) will run in the wrong
   direction until the real order is filled in. To read it: open Vial's Lighting
   panel, select **Direct Control**, and paint one LED at a time.
-- `[rgb_matrix].animations` turns on every effect the fork can render. The
-  effects listed in the file as "not ported yet" (typing heatmap, digital rain,
-  the reactive/splash family, pixel fractal) need key events or the matrix
-  framebuffer and are the next batch.
+- `[rgb_matrix].animations` turns on every effect the fork implements — all of
+  QMK's RGB Matrix effects now, including the reactive/splash family, the typing
+  heatmap and digital rain. The reactive ones answer key presses by default;
+  `react_on_keyup = true` makes them answer releases instead.
 - The chain is powered from 5 V; the firmware caps brightness at 128 of 255 and
   the default brightness is 64. Nineteen LEDs at full white would be about
   1.14 A.
