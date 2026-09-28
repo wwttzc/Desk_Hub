@@ -31,6 +31,10 @@ led_count = 19
 max_brightness = 16
 # QMK: rgb_matrix.timeout，多久没有按键就自动熄灯（毫秒），0 = 不熄。
 timeout = 0
+# QMK: rgb_matrix.sleep。主机挂起或断开（PC 睡眠 / 关机 / 拔线）时把灯链熄灭。
+# 本板自带 DC 供电，PC 关机后 MCU 与灯链照常有电，所以只有这一项能让它灭；
+# PC 回来时会自动恢复原来的效果（效果会重新 init）。
+sleep = true
 # QMK: rgb_matrix.led_flush_limit，帧间隔（毫秒）。QMK 默认 16（≈60fps），
 # 这里用 33（≈30fps）：本引擎每帧只在整条链上渲染一次，33ms 已足够顺滑。
 led_flush_limit = 16
@@ -49,7 +53,6 @@ speed_steps = 16
 # 以下 QMK 键本固件没有对应行为，写了会直接编译失败（未知字段），因为它们不是
 # “没接上”而是“没有这个功能”：
 #   led_process_limit  —— RMK 每帧一次性渲染整条链，等价于 QMK 把它设成灯数
-#   sleep              —— 需要主机挂起检测，RMK 侧没有接
 #   split_count        —— 单链键盘
 #   flag_steps         —— 需要 RMK 还没有的灯光键码（RgbFlag*）
 
