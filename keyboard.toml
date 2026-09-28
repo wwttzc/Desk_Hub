@@ -38,7 +38,7 @@ map = """
 """
 
 [keymap]
-layers = 2
+layers = 4
 
 [[keymap.layer]]
 name = "base"
